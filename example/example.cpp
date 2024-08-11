@@ -27,6 +27,7 @@ void custom_flags_example();
 void file_events_example();
 void replace_default_logger_example();
 void mdc_example();
+void syslog_formatter_example();
 
 #include "spdlog/spdlog.h"
 #include "spdlog/cfg/env.h"   // support for loading levels from the environment variable
@@ -86,6 +87,7 @@ int main(int, char *[]) {
         file_events_example();
         replace_default_logger_example();
         mdc_example();
+        syslog_formatter_example();
 
         // Flush all *registered* loggers using a worker thread every 3 seconds.
         // note: registered loggers *must* be thread safe for this to work correctly!
@@ -390,4 +392,15 @@ void mdc_example()
     // if not using the default format, you can use the %& formatter to print mdc data as well
     spdlog::set_pattern("[%H:%M:%S %z] [%^%L%$] [%&] %v");
     spdlog::info("Some log message with context");
+}
+
+#include "spdlog/syslog_formatter.h"
+void syslog_formatter_example()
+{
+    // run "nc -klu 514" to receive the syslog message
+    spdlog::sinks::udp_sink_config udp_sink_config("127.0.0.1", 514);
+    auto udp_logger = spdlog::udp_logger_mt("udp_logger", udp_sink_config);
+    spdlog::syslog_formatter syslog_formatter(spdlog::facility::user, "localhost", "example");
+    udp_logger->set_formatter(syslog_formatter.clone());
+    udp_logger->info("this message will be logged in local syslog receiver");
 }

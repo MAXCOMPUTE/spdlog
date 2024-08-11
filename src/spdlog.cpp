@@ -17,6 +17,7 @@
 #include <spdlog/sinks/base_sink-inl.h>
 #include <spdlog/sinks/sink-inl.h>
 #include <spdlog/spdlog-inl.h>
+#include <spdlog/syslog_formatter-inl.h>
 
 #include <mutex>
 
