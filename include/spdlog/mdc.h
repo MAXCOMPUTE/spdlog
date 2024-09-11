@@ -21,25 +21,37 @@ public:
     using mdc_map_t = std::map<std::string, std::string>;
 
     static void put(const std::string &key, const std::string &value) {
-        get_context()[key] = value;
+        auto pcontext = get_context();
+        if (pcontext) { (*pcontext)[key] = value; }
     }
 
     static std::string get(const std::string &key) {
-        auto &context = get_context();
-        auto it = context.find(key);
-        if (it != context.end()) {
+        auto pcontext = get_context();
+        if (!pcontext) { return ""; }
+        auto it = pcontext->find(key);
+        if (it != pcontext->end()) {
             return it->second;
         }
         return "";
     }
 
-    static void remove(const std::string &key) { get_context().erase(key); }
+    static void remove(const std::string &key) {
+        auto pcontext = get_context();
+        if (pcontext) { pcontext->erase(key);}
+    }
 
-    static void clear() { get_context().clear(); }
+    static void clear() {
+        auto pcontext = get_context();
+        if (pcontext) { pcontext->clear(); }
+    }
 
-    static mdc_map_t &get_context() {
+    static mdc_map_t *get_context() {
+#if defined(SPDLOG_NO_TLS)
+        return nullptr;
+#else
         static thread_local mdc_map_t context;
-        return context;
+        return &context;
+#endif
     }
 };
 

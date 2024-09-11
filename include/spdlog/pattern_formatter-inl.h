@@ -793,12 +793,12 @@ public:
         : flag_formatter(padinfo) {}
 
     void format(const details::log_msg &, const std::tm &, memory_buf_t &dest) override {
-        auto &mdc_map = mdc::get_context();
-        if (mdc_map.empty()) {
+        auto pmdc_map = mdc::get_context();
+        if (!pmdc_map || pmdc_map->empty()) {
             ScopedPadder p(0, padinfo_, dest);
             return;
         } else {
-            format_mdc(mdc_map, dest);
+            format_mdc(*pmdc_map, dest);
         }
     }
 
@@ -902,10 +902,10 @@ public:
         }
 
         // add mdc if present
-        auto &mdc_map = mdc::get_context();
-        if (!mdc_map.empty()) {
+        auto pmdc_map = mdc::get_context();
+        if (pmdc_map && !pmdc_map->empty()) {
             dest.push_back('[');
-            mdc_formatter_.format_mdc(mdc_map, dest);
+            mdc_formatter_.format_mdc(*pmdc_map, dest);
             dest.push_back(']');
             dest.push_back(' ');
         }
