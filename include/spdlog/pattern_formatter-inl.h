@@ -10,9 +10,12 @@
 #include <spdlog/details/fmt_helper.h>
 #include <spdlog/details/log_msg.h>
 #include <spdlog/details/os.h>
-#include <spdlog/mdc.h>
 #include <spdlog/fmt/fmt.h>
 #include <spdlog/formatter.h>
+
+#ifndef SPDLOG_NO_TLS
+    #include <spdlog/mdc.h>
+#endif
 
 #include <algorithm>
 #include <array>
@@ -784,6 +787,7 @@ private:
     log_clock::time_point last_message_time_;
 };
 
+#ifndef SPDLOG_NO_TLS
 // Class for formatting Mapped Diagnostic Context (MDC) in log messages.
 // Example: [logger-name] [info] [mdc_key_1:mdc_value_1 mdc_key_2:mdc_value_2] some message
 template <typename ScopedPadder>
@@ -824,6 +828,7 @@ public:
         }
     }
 };
+#endif
 
 // Full info formatter
 // pattern: [%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%s:%#] %v
@@ -901,6 +906,7 @@ public:
             dest.push_back(' ');
         }
 
+#ifndef SPDLOG_NO_TLS
         // add mdc if present
         auto &mdc_map = mdc::get_context();
         if (!mdc_map.empty()) {
@@ -909,6 +915,8 @@ public:
             dest.push_back(']');
             dest.push_back(' ');
         }
+#endif
+
         // fmt_helper::append_string_view(msg.msg(), dest);
         fmt_helper::append_string_view(msg.payload, dest);
     }
@@ -916,7 +924,9 @@ public:
 private:
     std::chrono::seconds cache_timestamp_{0};
     memory_buf_t cached_datetime_;
+#ifndef SPDLOG_NO_TLS
     mdc_formatter<null_scoped_padder> mdc_formatter_{padding_info{}};
+#endif
 };
 
 }  // namespace details
@@ -1211,9 +1221,11 @@ SPDLOG_INLINE void pattern_formatter::handle_flag_(char flag, details::padding_i
                     padding));
             break;
 
+#ifndef SPDLOG_NO_TLS
         case ('&'):
             formatters_.push_back(details::make_unique<details::mdc_formatter<Padder>>(padding));
             break;
+#endif
 
         default:  // Unknown flag appears as is
             auto unknown_flag = details::make_unique<details::aggregate_formatter>();

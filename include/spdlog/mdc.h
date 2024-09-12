@@ -8,6 +8,10 @@
 
 #include <spdlog/common.h>
 
+#ifdef SPDLOG_NO_TLS
+    #error MDC is not supported with SPDLOG_NO_TLS.
+#endif
+
 // MDC is a simple map of key->string values stored in thread local storage whose content will be printed by the loggers.
 // Note: Not supported in async mode (thread local storage - so the async thread pool have different copy).
 //
