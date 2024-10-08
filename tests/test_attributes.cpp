@@ -182,7 +182,7 @@ TEST_CASE("attribute test - multi threaded") {
     // put attributes with multiple threads simultaneously
     std::vector<std::future<void>> tasks;
     for (unsigned int i = 0; i < n_tasks; ++i) {
-        auto task = std::async([&logger, i, n_values] {
+        auto task = std::async([&logger, i] {
             for (auto j = 0; j < n_values; ++j)
                 logger.attrs().put(fmt_lib::format("log_{}_key_{}", i, j), fmt_lib::format("log_{}_value_{}", i, j));
         });
