@@ -102,4 +102,7 @@ void logger::err_handler_(const std::string &msg) {
 #endif
     }
 }
+
+log_attributes &logger::attrs() { return attributes; }
+
 }  // namespace spdlog

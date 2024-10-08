@@ -20,6 +20,7 @@
 #include "./common.h"
 #include "./details/log_msg.h"
 #include "./sinks/sink.h"
+#include "attributes.h"
 
 #ifndef SPDLOG_NO_EXCEPTIONS
     #define SPDLOG_LOGGER_CATCH(location)                                                                  \
@@ -90,20 +91,20 @@ public:
     // log with no format string, just string message
     void log(source_loc loc, level lvl, string_view_t msg) {
         if (should_log(lvl)) {
-            sink_it_(details::log_msg(loc, name_, lvl, msg));
+            sink_it_(details::log_msg(loc, name_, lvl, msg, attributes));
         }
     }
 
     void log(level lvl, string_view_t msg) {
         if (should_log(lvl)) {
-            sink_it_(details::log_msg(source_loc{}, name_, lvl, msg));
+            sink_it_(details::log_msg(source_loc{}, name_, lvl, msg, attributes));
         }
     }
 
     // support for custom time
     void log(log_clock::time_point log_time, source_loc loc, level lvl, string_view_t msg) {
         if (should_log(lvl)) {
-            sink_it_(details::log_msg(log_time, loc, name_, lvl, msg));
+            sink_it_(details::log_msg(log_time, loc, name_, lvl, msg, attributes));
         }
     }
 
@@ -229,9 +230,12 @@ public:
     // create new logger with same sinks and configuration.
     virtual std::shared_ptr<logger> clone(std::string logger_name);
 
+    log_attributes &attrs();
+
 protected:
     std::string name_;
     std::vector<sink_ptr> sinks_;
+    log_attributes attributes;
     spdlog::atomic_level_t level_{level::info};
     spdlog::atomic_level_t flush_level_{level::off};
     err_handler custom_err_handler_{nullptr};
@@ -248,7 +252,7 @@ protected:
 #else  // use {fmt} lib
             memory_buf_t buf;
             fmt::vformat_to(std::back_inserter(buf), fmt, fmt::make_format_args(args...));
-            sink_it_(details::log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size())));
+            sink_it_(details::log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()), attributes));
 #endif
         }
         SPDLOG_LOGGER_CATCH(loc)

@@ -168,6 +168,7 @@ find_package(Threads REQUIRED)
 set(SPDLOG_HEADERS
     "include/spdlog/async.h"
     "include/spdlog/async_logger.h"
+    "include/spdlog/attributes.h"
     "include/spdlog/common.h"
     "include/spdlog/formatter.h"
     "include/spdlog/fwd.h"
