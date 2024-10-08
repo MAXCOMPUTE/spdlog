@@ -173,7 +173,7 @@ TEST_CASE("attribute test - nested scoped") {
 }
 
 TEST_CASE("attribute test - multi threaded") {
-    const int n_tasks = std::thread::hardware_concurrency();
+    const unsigned int n_tasks = std::thread::hardware_concurrency();
     constexpr auto n_values = 30;
     auto mt_sink = std::make_shared<spdlog::sinks::test_sink_mt>();
     auto logger = spdlog::logger("logger", mt_sink);
@@ -181,7 +181,7 @@ TEST_CASE("attribute test - multi threaded") {
 
     // put attributes with multiple threads simultaneously
     std::vector<std::future<void>> tasks;
-    for (auto i = 0; i < n_tasks; ++i) {
+    for (unsigned int i = 0; i < n_tasks; ++i) {
         auto task = std::async([&logger, i, n_values] {
             for (auto j = 0; j < n_values; ++j)
                 logger.attrs().put(fmt_lib::format("log_{}_key_{}", i, j), fmt_lib::format("log_{}_value_{}", i, j));
@@ -194,7 +194,7 @@ TEST_CASE("attribute test - multi threaded") {
     logger.info("");
     REQUIRE(!mt_sink->lines().empty());
     auto log_line = mt_sink->lines().back();
-    for (auto i = 0; i < n_tasks; ++i) {
+    for (unsigned int i = 0; i < n_tasks; ++i) {
         for (auto j = 0; j < n_values; ++j) {
             auto search_term = fmt_lib::format("log_{0}_key_{1}:log_{0}_value_{1}", i, j);
             REQUIRE(log_line.find(search_term) != std::string::npos);
