@@ -1308,7 +1308,7 @@ SPDLOG_INLINE void pattern_formatter::compile_pattern_(const std::string &patter
         if (*it == '%') {
             if (user_chars)  // append user chars found so far
             {
-                formatters_.emplace_back(user_chars.release());
+                formatters_.push_back(std::move(user_chars));
             }
 
             auto padding = handle_padspec_(++it, end);
@@ -1332,7 +1332,7 @@ SPDLOG_INLINE void pattern_formatter::compile_pattern_(const std::string &patter
     }
     if (user_chars)  // append raw chars found so far
     {
-		formatters_.emplace_back(user_chars.release());
-	}
+        formatters_.push_back(std::move(user_chars));
+    }
 }
 }  // namespace spdlog
