@@ -8,10 +8,9 @@ Copy the include [folder](https://github.com/gabime/spdlog/tree/v1.x/include/spd
 
 #### Compiled version (recommended - much faster compile times)
 ```console
-git clone https://github.com/gabime/spdlog.git
-cd spdlog ; mkdir build ; cd build
-cmake .. ; cmake --build . --parallel
-cmake --install .
+$ git clone https://github.com/gabime/spdlog.git
+$ cd spdlog && mkdir build && cd build
+$ cmake .. && cmake --build .
 ```
 see example [CMakeLists.txt](https://github.com/gabime/spdlog/blob/v1.x/example/CMakeLists.txt) on how to use.
 
