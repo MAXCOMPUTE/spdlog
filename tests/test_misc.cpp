@@ -173,15 +173,15 @@ TEST_CASE("utf8 to utf16 conversion using windows api", "[windows utf]") {
     spdlog::wmemory_buf_t buffer;
 
     spdlog::details::os::utf8_to_wstrbuf("", buffer);
-    REQUIRE(buffer.data() == std::wstring(L""));
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L""));
 
     spdlog::details::os::utf8_to_wstrbuf("abc", buffer);
-    REQUIRE(buffer.data() == std::wstring(L"abc"));
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"abc"));
 
     spdlog::details::os::utf8_to_wstrbuf("\xc3\x28", buffer); // Invalid UTF-8 sequence.
-    REQUIRE(buffer.data() == std::wstring(L"\xfffd("));
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"\xfffd("));
 
     spdlog::details::os::utf8_to_wstrbuf("\xe3\x81\xad\xe3\x81\x93", buffer); // "Neko" in hiragana.
-    REQUIRE(buffer.data() == std::wstring(L"\x306d\x3053"));
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"\x306d\x3053"));
 }
 #endif
