@@ -22,6 +22,10 @@
         #define SPDLOG_ANDROID_RETRIES 2
     #endif
 
+    #if __ANDROID_API__ >= 30
+        #define SPDLOG_ANDROID_ENABLE_LOG_WRITE
+    #endif
+
 namespace spdlog {
 namespace sinks {
 
@@ -35,7 +39,12 @@ class android_sink final : public base_sink<Mutex> {
 public:
     explicit android_sink(std::string tag = "spdlog", bool use_raw_msg = false)
         : tag_(std::move(tag)),
-          use_raw_msg_(use_raw_msg) {}
+          use_raw_msg_(use_raw_msg) {
+        // Available since API level 30
+    #ifdef SPDLOG_ANDROID_ENABLE_LOG_WRITE
+        write_message_ = (write_log_message_t)dlsym(nullptr, "__android_log_write_log_message");
+    #endif
+    }
 
 protected:
     void sink_it_(const details::log_msg &msg) override {
@@ -48,6 +57,21 @@ protected:
         }
         formatted.push_back('\0');
         const char *msg_output = formatted.data();
+
+    #ifdef SPDLOG_ANDROID_ENABLE_LOG_WRITE
+        if (write_message_) {
+            __android_log_message logMessage{};
+            logMessage.struct_size = sizeof(logMessage);
+            logMessage.buffer_id = BufferID;
+            logMessage.priority = priority;
+            logMessage.tag = tag_.c_str();
+            logMessage.file = msg.source.filename;
+            logMessage.line = static_cast<uint32_t>(msg.source.line);
+            logMessage.message = msg_output;
+            write_message_(&logMessage);
+            return;
+        }
+    #endif
 
         // See system/core/liblog/logger_write.c for explanation of return value
         int ret = android_log(priority, tag_.c_str(), msg_output);
@@ -104,8 +128,15 @@ private:
         }
     }
 
+    #ifdef SPDLOG_ANDROID_ENABLE_LOG_WRITE
+    typedef void (*write_log_message_t)(struct __android_log_message *log_message);
+    #endif
+
     std::string tag_;
     bool use_raw_msg_;
+    #ifdef SPDLOG_ANDROID_ENABLE_LOG_WRITE
+    write_log_message_t write_message_;
+    #endif
 };
 
 using android_sink_mt = android_sink<std::mutex>;
